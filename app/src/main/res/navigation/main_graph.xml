@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/pokedexIndexFragment">
+
+    <fragment
+        android:id="@+id/pokedexIndexFragment"
+        android:name="me.danielaguilar.pokedex.ui.PokedexIndexFragment"
+        android:label=""
+        tools:layout="@layout/fragment_pokedex_index" />
+</navigation>
