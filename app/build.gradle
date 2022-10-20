@@ -2,12 +2,16 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-parcelize'
+    id 'com.google.dagger.hilt.android'
+    id 'kotlin-kapt'
 }
+
+def basePokemonImageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/"
+def pokedexApiUrl = "https://pokeapi.co/"
 
 android {
     namespace 'me.danielaguilar.pokedex'
     compileSdk 33
-
     defaultConfig {
         applicationId "me.danielaguilar.pokedex"
         minSdk 21
@@ -15,6 +19,9 @@ android {
         versionCode 1
         versionName "1.0"
 
+
+        buildConfigField("String", "BASE_POKEMON_IMAGE_URL", "\"${basePokemonImageUrl}\"")
+        buildConfigField("String", "POKEDEX_API_URL", "\"${pokedexApiUrl}\"")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,6 +42,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
 }
 
 dependencies {
@@ -52,7 +60,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
 
-    def nav_version = "2.5.0"
+    def nav_version = "2.5.2"
 
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
@@ -63,7 +71,22 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.0-alpha02'
 
+    implementation 'com.google.dagger:hilt-android:2.44'
+    kapt 'com.google.dagger:hilt-compiler:2.44'
+
+    // For instrumentation tests
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.44'
+    kaptAndroidTest 'com.google.dagger:hilt-compiler:2.44'
+
+    // For local unit tests
+    testImplementation 'com.google.dagger:hilt-android-testing:2.44'
+    kaptTest 'com.google.dagger:hilt-compiler:2.44'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}
+
+kapt {
+    correctErrorTypes true
 }
