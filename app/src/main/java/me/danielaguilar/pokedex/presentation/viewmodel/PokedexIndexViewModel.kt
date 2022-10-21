@@ -7,16 +7,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.danielaguilar.pokedex.domain.PokemonSummary
+import me.danielaguilar.pokedex.domain.*
 import me.danielaguilar.pokedex.presentation.uistate.PokedexIndexViewState
 import me.danielaguilar.pokedex.usecase.GetAllPokemonUseCase
+import me.danielaguilar.pokedex.usecase.GetPokemonUseCase
+import me.danielaguilar.pokedex.usecase.SavePokemonUseCase
+import me.danielaguilar.pokedex.util.PokemonPropertiesExtractor
 import me.danielaguilar.pokedex.util.extension.toDomainPokemonSummary
 import javax.inject.Inject
 
 @HiltViewModel
 class PokedexIndexViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val getAllPokemonUseCase: GetAllPokemonUseCase
+    private val getAllPokemonUseCase: GetAllPokemonUseCase,
+    private val getPokemonUseCase: GetPokemonUseCase,
+    private val savePokemonUseCase: SavePokemonUseCase
 ) : ViewModel() {
 
     private val pokemonRecyclerStateKey = "pokemons"
@@ -54,7 +59,41 @@ class PokedexIndexViewModel @Inject constructor(
             val response = getAllPokemonUseCase.getAllPokemon()
             withContext(Dispatchers.Main) {
                 if (response.isSuccessful) {
-                    _viewState.postValue(PokedexIndexViewState.Success(response.body()!!.results.map { p -> p.toDomainPokemonSummary() }))
+                    val pokemons = response.body()!!.results.map { p -> p.toDomainPokemonSummary() }
+                    _viewState.postValue(PokedexIndexViewState.Success(pokemons))
+                    pokemons.map { p ->
+
+                        val pokemonResponse = getPokemonUseCase.getPokemonInfo(p.id)
+                        if (pokemonResponse.isSuccessful) {
+                            val apiResponse = pokemonResponse.body()!!
+                            savePokemonUseCase.savePokemonInfo(
+                                PokemonInfo(
+                                    p.id,
+                                    p.name,
+                                    null,
+                                    types = apiResponse.types.map { pk ->
+                                        PokemonKind(
+                                            PokemonPropertiesExtractor().getIdFromUrl(pk.type.url),
+                                            pk.type.name
+                                        )
+                                    },
+                                    attacks = apiResponse.moves.map { m ->
+                                        PokemonAttack(
+                                            m.move.name,
+                                            PokemonPropertiesExtractor().getIdFromUrl(m.move.url)
+                                        )
+                                    },
+                                    skills = apiResponse.abilities.map { a ->
+                                        PokemonSkill(
+                                            a.ability.name,
+                                            id = PokemonPropertiesExtractor().getIdFromUrl(a.ability.url)
+                                        )
+                                    },
+                                    locations = listOf()
+                                )
+                            )
+                        }
+                    }
                 } else {
                     onError("Error : ${response.message()} ")
                 }
