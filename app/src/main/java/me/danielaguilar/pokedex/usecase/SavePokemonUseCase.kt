@@ -8,7 +8,7 @@ import javax.inject.Inject
 class SavePokemonUseCase @Inject constructor(private val pokedexRepository: PokedexRepository) {
 
     suspend fun savePokemonInfo(pokemon: PokemonInfo) {
-        return pokedexRepository.savePokemon(
+        pokedexRepository.savePokemon(
             pokemon.toPokemonEntity(),
             pokemon.getPokemonSkillsEntity(),
             pokemon.getPokemonAttacksEntity(),

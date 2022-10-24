@@ -4,4 +4,10 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="pokedex">Pokedex</string>
     <string name="reload_pokemons">Recargar</string>
+    <string name="search">search</string>
+    <string name="enter_name">Enter name</string>
+    <string name="types">Types:</string>
+    <string name="name">Name:</string>
+    <string name="attacks">Attacks:</string>
+    <string name="abilities">Abilities:</string>
 </resources>

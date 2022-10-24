@@ -1,11 +1,9 @@
 package me.danielaguilar.pokedex.presentation.uistate
 
-import me.danielaguilar.pokedex.domain.PokemonSummary
+sealed class PokedexIndexViewState<out T> {
+    data class Success<out T : Any>(val data: T) : PokedexIndexViewState<T>()
+    data class Error(val error: Exception? = null, val errorMessage: String) :
+        PokedexIndexViewState<Nothing>()
 
-sealed class PokedexIndexViewState {
-    data class Success(val pokemonList: List<PokemonSummary>) : PokedexIndexViewState()
-    data class Error(val pokemonList: List<PokemonSummary>, val errorMessage: String) :
-        PokedexIndexViewState()
-
-    object Loading : PokedexIndexViewState()
+    object Loading : PokedexIndexViewState<Nothing>()
 }

@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         navController = findNavController(R.id.navHostContainer)
         val appBarConfig = AppBarConfiguration(
             setOf(
-                R.id.pokedexIndexFragment,
+                R.id.pokedexIndexFragment
             )
         )
         binding.bottomNavigationView.setupWithNavController(navController)

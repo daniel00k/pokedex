@@ -1,11 +1,13 @@
 package me.danielaguilar.pokedex.ui
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
@@ -25,6 +27,7 @@ import me.danielaguilar.pokedex.util.extension.visible
 class PokedexIndexFragment : Fragment(), OnClickListener {
 
     private lateinit var navigationController: NavController
+    private lateinit var adapter: PokemonListAdapter
 
     private val viewModel: PokedexIndexViewModel by viewModels()
     private var _binding: FragmentPokedexIndexBinding? = null
@@ -42,6 +45,7 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupMenu()
         navigationController = Navigation.findNavController(view)
         setAdapter(pokemonSummaryList)
         binding.pokemonsList.layoutManager =
@@ -58,10 +62,11 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
                 is PokedexIndexViewState.Success -> {
                     hideLoading()
                     showPokemonList()
-                    this.pokemonSummaryList = state.pokemonList
-                    setAdapter(state.pokemonList)
+                    this.pokemonSummaryList = state.data
+                    setAdapter(state.data)
                 }
 
+                else -> {}
             }
 
         }
@@ -76,8 +81,14 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
     }
 
     private fun setAdapter(pokemonSummaries: List<PokemonSummary>) {
-        binding.pokemonsList.adapter =
-            PokemonListAdapter(pokemonSummaries, requireContext(), this)
+        if (this::adapter.isInitialized) {
+            adapter.setPokemons(pokemonSummaries)
+            adapter.notifyDataSetChanged()
+        } else {
+            binding.pokemonsList.adapter =
+                PokemonListAdapter(pokemonSummaries, requireContext(), this)
+        }
+
         viewModel.getRecyclerState()?.let {
             (binding.pokemonsList.layoutManager as GridLayoutManager).onRestoreInstanceState(it)
         }
@@ -113,6 +124,41 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
     }
 
     override fun onPokemonSelected(pokemonSummary: PokemonSummary) {
-        TODO("Not yet implemented")
+        val direction =
+            PokedexIndexFragmentDirections.actionPokedexIndexFragmentToPokemonDetailsFragment(
+                pokemonSummary.id
+            )
+
+        navigationController.navigate(direction)
+    }
+
+    private fun setupMenu() {
+        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
+            override fun onPrepareMenu(menu: Menu) {
+                // Handle for example visibility of menu items
+            }
+
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.top_menu, menu)
+                val item = menu?.findItem(R.id.action_search)
+                val searchView = item?.actionView as SearchView
+                searchView.queryHint = resources.getString(R.string.search)
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        return true
+                    }
+
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        viewModel.searchPokemonByName(newText ?: "")
+                        return true
+                    }
+
+                })
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return true
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 }

@@ -14,7 +14,7 @@ interface OnClickListener {
 }
 
 class PokemonListAdapter(
-    private val pokemons: List<PokemonSummary>,
+    private var pokemons: List<PokemonSummary>,
     private val context: Context,
     private val onClickListener: OnClickListener
 ) : RecyclerView.Adapter<PokemonViewHolder>() {
@@ -35,4 +35,8 @@ class PokemonListAdapter(
     }
 
     override fun getItemCount() = pokemons.size
+
+    fun setPokemons(pokemonSummaries: List<PokemonSummary>) {
+        this.pokemons = pokemonSummaries
+    }
 }

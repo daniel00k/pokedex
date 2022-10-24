@@ -20,4 +20,8 @@ class PokemonPropertiesExtractor {
         val id = getIdFromUrl(url)
         return "${BuildConfig.BASE_POKEMON_IMAGE_URL}/${id}.png"
     }
+
+    fun getImageUrlFromId(id: Int): String {
+        return "${BuildConfig.BASE_POKEMON_IMAGE_URL}/${id}.png"
+    }
 }

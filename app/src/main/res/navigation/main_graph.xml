@@ -9,5 +9,20 @@
         android:id="@+id/pokedexIndexFragment"
         android:name="me.danielaguilar.pokedex.ui.PokedexIndexFragment"
         android:label=""
-        tools:layout="@layout/fragment_pokedex_index" />
+        tools:layout="@layout/fragment_pokedex_index">
+        <action
+            android:id="@+id/action_pokedexIndexFragment_to_pokemonDetailsFragment"
+            app:destination="@id/pokemonDetailsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim">
+            <argument
+                android:name="pokemonId"
+                app:argType="integer"
+                app:nullable="false" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/pokemonDetailsFragment"
+        android:name="me.danielaguilar.pokedex.ui.PokemonDetailsFragment"
+        android:label=""
+        tools:layout="@layout/fragment_pokemon_details" />
 </navigation>

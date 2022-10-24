@@ -43,4 +43,12 @@ class PokedexRepository @Inject constructor(
             db.pokemonAndKindDao().insert(PokemonAndKindEntity(pokemonEntity.id, t.kindId))
         }
     }
+
+    suspend fun findPokemonByName(name: String): List<PokemonEntity> {
+        return db.pokemonDao().getAllByName(name)
+    }
+
+    suspend fun findPokemonById(id: Int): PokemonDetailedInformationEntity {
+        return db.pokemonDao().findById(id)
+    }
 }

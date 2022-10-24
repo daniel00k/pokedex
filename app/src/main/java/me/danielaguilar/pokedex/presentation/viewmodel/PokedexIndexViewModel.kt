@@ -12,6 +12,7 @@ import me.danielaguilar.pokedex.presentation.uistate.PokedexIndexViewState
 import me.danielaguilar.pokedex.usecase.GetAllPokemonUseCase
 import me.danielaguilar.pokedex.usecase.GetPokemonUseCase
 import me.danielaguilar.pokedex.usecase.SavePokemonUseCase
+import me.danielaguilar.pokedex.usecase.SearchPokemonUseCase
 import me.danielaguilar.pokedex.util.PokemonPropertiesExtractor
 import me.danielaguilar.pokedex.util.extension.toDomainPokemonSummary
 import javax.inject.Inject
@@ -21,15 +22,17 @@ class PokedexIndexViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getAllPokemonUseCase: GetAllPokemonUseCase,
     private val getPokemonUseCase: GetPokemonUseCase,
-    private val savePokemonUseCase: SavePokemonUseCase
+    private val savePokemonUseCase: SavePokemonUseCase,
+    private val searchPokemonUseCase: SearchPokemonUseCase
 ) : ViewModel() {
 
     private val pokemonRecyclerStateKey = "pokemons"
     private val recyclerStateKey = "recyclerState"
-    private val _viewState = MutableLiveData<PokedexIndexViewState>(PokedexIndexViewState.Loading)
-    val viewState: LiveData<PokedexIndexViewState>
+    private val _viewState = MutableLiveData<PokedexIndexViewState<List<PokemonSummary>>>(PokedexIndexViewState.Loading)
+    val viewState: LiveData<PokedexIndexViewState<List<PokemonSummary>>>
         get() = _viewState
     private lateinit var job: Job
+    private lateinit var jobSearch: Job
 
     fun setData(pokemons: List<PokemonSummary>) {
         savedStateHandle[pokemonRecyclerStateKey] = pokemons
@@ -44,6 +47,16 @@ class PokedexIndexViewModel @Inject constructor(
             return savedStateHandle[recyclerStateKey]
         }
         return null
+    }
+
+    fun searchPokemonByName(name: String) {
+        _viewState.postValue(PokedexIndexViewState.Loading)
+        jobSearch = viewModelScope.launch(Dispatchers.IO) {
+            val pokemons = searchPokemonUseCase.getAllByName(name)
+            withContext(Dispatchers.Main) {
+                _viewState.postValue(PokedexIndexViewState.Success(pokemons))
+            }
+        }
     }
 
     fun getPokemons() {
@@ -70,7 +83,7 @@ class PokedexIndexViewModel @Inject constructor(
                                 PokemonInfo(
                                     p.id,
                                     p.name,
-                                    null,
+                                    PokemonPropertiesExtractor().getImageUrlFromId(p.id),
                                     types = apiResponse.types.map { pk ->
                                         PokemonKind(
                                             PokemonPropertiesExtractor().getIdFromUrl(pk.type.url),
@@ -102,7 +115,7 @@ class PokedexIndexViewModel @Inject constructor(
     }
 
     private fun onError(message: String) {
-        _viewState.postValue(PokedexIndexViewState.Error(emptyList(), message))
+        _viewState.postValue(PokedexIndexViewState.Error(errorMessage = message))
     }
 
     override fun onCleared() {
@@ -113,6 +126,9 @@ class PokedexIndexViewModel @Inject constructor(
         }
         if (this::job.isInitialized) {
             job.cancel()
+        }
+        if (this::jobSearch.isInitialized) {
+            jobSearch.cancel()
         }
     }
 }
