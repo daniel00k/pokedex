@@ -4,6 +4,7 @@ import me.danielaguilar.pokedex.data.datasource.local.pokedex.PokemonDatabase
 import me.danielaguilar.pokedex.data.datasource.remote.pokedex.PokedexApi
 import me.danielaguilar.pokedex.data.entity.*
 import me.danielaguilar.pokedex.data.model.pokedex.AllPokemonApiResponse
+import me.danielaguilar.pokedex.data.model.pokedex.LocationAreaWrapper
 import me.danielaguilar.pokedex.data.model.pokedex.PokemonApiResponse
 import retrofit2.Response
 import javax.inject.Inject
@@ -22,11 +23,21 @@ class PokedexRepository @Inject constructor(
         return pokedexApi.getPokemonById(id)
     }
 
+    suspend fun fetchPokemonEncounters(id: Int): Response<List<LocationAreaWrapper>> {
+        return pokedexApi.getPokemonEncountersById(id)
+    }
+
+    suspend fun savePokemonLocation(locations: List<LocationEntity>, pokemonId: Int) {
+        locations.map { l ->
+            db.locationDao().insert(l)
+            db.pokemonAndLocationDao().insert(PokemonAndLocationEntity(pokemonId, l.locationId))
+        }
+    }
+
     suspend fun savePokemon(
         pokemonEntity: PokemonEntity,
         skills: List<SkillEntity>,
         attacks: List<AttackEntity>,
-        locations: List<LocationEntity>,
         types: List<PokemonKindEntity>
     ) {
         db.pokemonDao().insertOne(pokemonEntity)

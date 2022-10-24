@@ -14,7 +14,3 @@ class PokemonEntity(
     @ColumnInfo(name = "evolution")
     val evolution: String?,
 )
-//    val kind: List<PokemonKindEntity>,
-//    val attacks: List<AttackEntity>,
-//    val skills: List<SkillEntity>,
-//    val locations: List<LocationEntity> )

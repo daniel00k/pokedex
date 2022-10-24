@@ -97,6 +97,24 @@
                 app:layout_constraintTop_toBottomOf="@id/pokemonAttack"
                 tools:text="rain-dish, run-away" />
 
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/pokemonLocationLbl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/locations"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/pokemonSkill" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/pokemonLocation"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pokemonLocationLbl"
+                app:layout_constraintTop_toBottomOf="@id/pokemonSkill"
+                tools:text="rain-dish, run-away" />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

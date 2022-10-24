@@ -28,7 +28,8 @@ class PokedexIndexViewModel @Inject constructor(
 
     private val pokemonRecyclerStateKey = "pokemons"
     private val recyclerStateKey = "recyclerState"
-    private val _viewState = MutableLiveData<PokedexIndexViewState<List<PokemonSummary>>>(PokedexIndexViewState.Loading)
+    private val _viewState =
+        MutableLiveData<PokedexIndexViewState<List<PokemonSummary>>>(PokedexIndexViewState.Loading)
     val viewState: LiveData<PokedexIndexViewState<List<PokemonSummary>>>
         get() = _viewState
     private lateinit var job: Job
@@ -77,6 +78,20 @@ class PokedexIndexViewModel @Inject constructor(
                     pokemons.map { p ->
 
                         val pokemonResponse = getPokemonUseCase.getPokemonInfo(p.id)
+                        val pokemonEncounterResponse =
+                            getPokemonUseCase.getPokemonEncounterInfo(p.id)
+                        if (pokemonEncounterResponse.isSuccessful) {
+                            val apiResponse = pokemonEncounterResponse.body()!!
+                            savePokemonUseCase.savePokemonLocationsInfo(
+                                pokemonId = p.id,
+                                locations = apiResponse.map { e ->
+                                    PokemonLocation(
+                                        id = PokemonPropertiesExtractor().getIdFromUrl(
+                                            e.locationArea.url
+                                        ), name = e.locationArea.name
+                                    )
+                                })
+                        }
                         if (pokemonResponse.isSuccessful) {
                             val apiResponse = pokemonResponse.body()!!
                             savePokemonUseCase.savePokemonInfo(

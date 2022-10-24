@@ -39,5 +39,16 @@ data class PokemonDetailedInformationEntity(
             entityColumn = "skillId"
         )
     )
-    val skills: List<SkillEntity>
+    val skills: List<SkillEntity>,
+    @Relation(
+        parentColumn = "pokemonId",
+        entity = LocationEntity::class,
+        entityColumn = "locationId",
+        associateBy = Junction(
+            value = PokemonAndLocationEntity::class,
+            parentColumn = "pokemonId",
+            entityColumn = "locationId"
+        )
+    )
+    val locations: List<LocationEntity>
 )
