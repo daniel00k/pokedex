@@ -1,5 +1,6 @@
 package me.danielaguilar.pokedex.util
 
+import me.danielaguilar.pokedex.BuildConfig
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,6 +15,23 @@ class PokemonPropertiesExtractorTest {
         val url = "https://pokeapi.co/api/v2/pokemon/1/"
         val expected = 1
         val actual = pokemonPropertiesExtractor.getIdFromUrl(url)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `gets image url using the id`() {
+        val id = 1
+        val expected = "${BuildConfig.BASE_POKEMON_IMAGE_URL}/${id}.png"
+        val actual = pokemonPropertiesExtractor.getImageUrlFromId(id)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `gets image url using the url`() {
+        val id = 1
+        val url = "https://pokeapi.co/api/v2/pokemon/${id}/"
+        val expected = "${BuildConfig.BASE_POKEMON_IMAGE_URL}/${id}.png"
+        val actual = pokemonPropertiesExtractor.getImageUrlFromUrl(url)
         assertEquals(expected, actual)
     }
 }
