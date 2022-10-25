@@ -58,10 +58,10 @@ class PokemonDetailsFragment : Fragment() {
     private fun setPokemonInfo(data: PokemonInfo) {
         binding.pokemonName.text = data.name
         ImageLoader().loadImage(data.imageUrl, requireContext(), binding.pokemonDescriptionAvatar)
-        binding.pokemonAttack.text = data.attacks.joinToString(",") { a -> a.name }
-        binding.pokemonType.text = data.types.joinToString(",") { t -> t.name }
-        binding.pokemonSkill.text = data.skills.joinToString(",") { a -> a.name }
-        binding.pokemonLocation.text = data.locations.joinToString(",") { l -> l.name }
+        binding.pokemonAttack.text = data.attacks.joinToString(", ") { a -> a.name }
+        binding.pokemonType.text = data.types.joinToString(", ") { t -> t.name }
+        binding.pokemonSkill.text = data.skills.joinToString(", ") { a -> a.name }
+        binding.pokemonLocation.text = data.locations.joinToString(", ") { l -> l.name }
     }
 
     private fun showError(message: String) {

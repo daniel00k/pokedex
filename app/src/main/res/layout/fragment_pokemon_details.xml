@@ -4,13 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="4dp"
+    android:padding="4dp"
     tools:context=".ui.PokemonDetailsFragment">
 
     <ProgressBar
         android:id="@+id/loadingPokemon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -25,46 +27,64 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/pokemonDescriptionAvatar"
-                android:layout_width="wrap_content"
-                android:layout_height="100dp"
-                android:src="@drawable/ic_search"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/pokemonName"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/imageContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="@+id/pokemonDescriptionAvatar"
-                app:layout_constraintStart_toStartOf="@+id/pokemonDescriptionAvatar"
-                app:layout_constraintTop_toBottomOf="@+id/pokemonDescriptionAvatar"
-                tools:text="Pikachu" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/pokemonDescriptionAvatar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_search"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/pokemonName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="@+id/pokemonDescriptionAvatar"
+                        app:layout_constraintStart_toStartOf="@+id/pokemonDescriptionAvatar"
+                        app:layout_constraintTop_toBottomOf="@+id/pokemonDescriptionAvatar"
+                        tools:text="Pikachu" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/pokemonTypeLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:text="@string/types"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/pokemonName" />
+                app:layout_constraintTop_toBottomOf="@+id/imageContainer" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/pokemonType"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:inputType="textMultiLine"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/pokemonTypeLbl"
-                app:layout_constraintTop_toBottomOf="@+id/pokemonName"
+                app:layout_constraintTop_toBottomOf="@+id/imageContainer"
                 tools:text="water, fire" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/pokemonAttackLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:text="@string/attacks"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/pokemonType" />
@@ -74,6 +94,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
+                android:layout_margin="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/pokemonAttackLbl"
                 app:layout_constraintTop_toBottomOf="@id/pokemonType"
@@ -83,6 +104,7 @@
                 android:id="@+id/pokemonSkillLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:text="@string/abilities"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/pokemonAttack" />
@@ -92,6 +114,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
+                android:layout_margin="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/pokemonSkillLbl"
                 app:layout_constraintTop_toBottomOf="@id/pokemonAttack"
@@ -101,6 +124,7 @@
                 android:id="@+id/pokemonLocationLbl"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_margin="4dp"
                 android:text="@string/locations"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/pokemonSkill" />
@@ -110,11 +134,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:inputType="textMultiLine"
+                android:layout_margin="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/pokemonLocationLbl"
                 app:layout_constraintTop_toBottomOf="@id/pokemonSkill"
                 tools:text="rain-dish, run-away" />
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

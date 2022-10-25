@@ -128,7 +128,6 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
             PokedexIndexFragmentDirections.actionPokedexIndexFragmentToPokemonDetailsFragment(
                 pokemonSummary.id
             )
-
         navigationController.navigate(direction)
     }
 
@@ -140,7 +139,7 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
 
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.top_menu, menu)
-                val item = menu?.findItem(R.id.action_search)
+                val item = menu.findItem(R.id.action_search)
                 val searchView = item?.actionView as SearchView
                 searchView.queryHint = resources.getString(R.string.search)
                 searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
