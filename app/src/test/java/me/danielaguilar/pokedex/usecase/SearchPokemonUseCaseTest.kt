@@ -32,9 +32,11 @@ class SearchPokemonUseCaseTest {
         val searchPokemonUseCase = SearchPokemonUseCase(pokedexRepository)
 
         runBlocking {
-            val actual = searchPokemonUseCase.getAllByName(name)
-            Assert.assertEquals(expected.size, actual.size)
-            Assert.assertEquals(expected[0].id, actual[0].id)
+            searchPokemonUseCase.getAllByName(name).collect { actual ->
+                Assert.assertEquals(expected.size, actual.size)
+                Assert.assertEquals(expected[0].id, actual[0].id)
+            }
+
         }
 
         coVerify(exactly = 1) {
@@ -59,9 +61,11 @@ class SearchPokemonUseCaseTest {
         val searchPokemonUseCase = SearchPokemonUseCase(pokedexRepository)
 
         runBlocking {
-            val actual = searchPokemonUseCase.getById(id)
-            Assert.assertEquals(expected.id, actual.id)
-            Assert.assertEquals(expected.name, actual.name)
+            searchPokemonUseCase.getById(id).collect { actual ->
+                Assert.assertEquals(expected.id, actual.id)
+                Assert.assertEquals(expected.name, actual.name)
+            }
+
         }
 
         coVerify(exactly = 1) {

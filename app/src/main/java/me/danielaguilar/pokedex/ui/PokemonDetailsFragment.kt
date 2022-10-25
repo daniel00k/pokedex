@@ -6,8 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import me.danielaguilar.pokedex.databinding.FragmentPokemonDetailsBinding
 import me.danielaguilar.pokedex.domain.PokemonInfo
 import me.danielaguilar.pokedex.presentation.uistate.PokedexIndexViewState
@@ -33,21 +37,26 @@ class PokemonDetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.viewState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is PokedexIndexViewState.Loading ->
-                    showLoading()
-                is PokedexIndexViewState.Error -> {
-                    hideLoading()
-                    showError(state.errorMessage)
-                }
-                is PokedexIndexViewState.Success -> {
-                    setPokemonInfo(state.data)
-                    hideLoading()
-                    showPokemon()
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.viewState.collect { state ->
+                    when (state) {
+                        is PokedexIndexViewState.Loading ->
+                            showLoading()
+                        is PokedexIndexViewState.Error -> {
+                            hideLoading()
+                            showError(state.errorMessage)
+                        }
+                        is PokedexIndexViewState.Success -> {
+                            setPokemonInfo(state.data)
+                            hideLoading()
+                            showPokemon()
+                        }
+                    }
                 }
             }
         }
+
         arguments.let {
             val pokemonId = it?.getInt("pokemonId")
             viewModel.getPokemonInfo(pokemonId!!)

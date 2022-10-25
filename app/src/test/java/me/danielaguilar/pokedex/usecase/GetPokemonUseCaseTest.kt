@@ -31,8 +31,9 @@ class GetPokemonUseCaseTest {
         coEvery { pokedexRepository.fetchPokemonById(id) } returns expected
         val getPokemonUseCase = GetPokemonUseCase(pokedexRepository)
         runBlocking {
-            val actual = getPokemonUseCase.getPokemonInfo(id)
-            Assert.assertEquals(expected, actual)
+            getPokemonUseCase.getPokemonInfo(id).collect { actual ->
+                Assert.assertEquals(expected, actual)
+            }
         }
 
         coVerify(exactly = 1) {
@@ -47,8 +48,9 @@ class GetPokemonUseCaseTest {
         coEvery { pokedexRepository.fetchPokemonEncounters(id) } returns expected
         val getPokemonUseCase = GetPokemonUseCase(pokedexRepository)
         runBlocking {
-            val actual = getPokemonUseCase.getPokemonEncounterInfo(id)
-            Assert.assertEquals(expected, actual)
+            getPokemonUseCase.getPokemonEncounterInfo(id).collect { actual ->
+                Assert.assertEquals(expected, actual)
+            }
         }
 
         coVerify(exactly = 1) {

@@ -9,7 +9,6 @@ import me.danielaguilar.pokedex.data.datasource.local.pokedex.PokemonDatabase
 import me.danielaguilar.pokedex.data.datasource.remote.pokedex.PokedexApi
 import me.danielaguilar.pokedex.data.model.pokedex.AllPokemonApiResponse
 import me.danielaguilar.pokedex.data.model.pokedex.PokemonSummary
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response

@@ -29,8 +29,9 @@ class GetAllPokemonUseCaseTest {
         coEvery { pokedexRepository.fetchAllPokemon() } returns expected
         val getAllPokemonUseCase = GetAllPokemonUseCase(pokedexRepository)
         runBlocking {
-            val actual = getAllPokemonUseCase.getAllPokemon()
-            Assert.assertEquals(expected, actual)
+            getAllPokemonUseCase.getAllPokemon().collect { actual ->
+                Assert.assertEquals(expected, actual)
+            }
         }
 
         coVerify(exactly = 1) {

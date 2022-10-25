@@ -1,12 +1,15 @@
 package me.danielaguilar.pokedex.presentation.viewmodel
 
 import android.os.Parcelable
-import androidx.lifecycle.*
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.danielaguilar.pokedex.domain.*
 import me.danielaguilar.pokedex.presentation.uistate.PokedexIndexViewState
 import me.danielaguilar.pokedex.usecase.GetAllPokemonUseCase
@@ -29,8 +32,8 @@ class PokedexIndexViewModel @Inject constructor(
     private val pokemonRecyclerStateKey = "pokemons"
     private val recyclerStateKey = "recyclerState"
     private val _viewState =
-        MutableLiveData<PokedexIndexViewState<List<PokemonSummary>>>(PokedexIndexViewState.Loading)
-    val viewState: LiveData<PokedexIndexViewState<List<PokemonSummary>>>
+        MutableStateFlow<PokedexIndexViewState<List<PokemonSummary>>>(PokedexIndexViewState.Loading)
+    val viewState: StateFlow<PokedexIndexViewState<List<PokemonSummary>>>
         get() = _viewState
     private lateinit var job: Job
     private lateinit var jobSearch: Job
@@ -51,18 +54,18 @@ class PokedexIndexViewModel @Inject constructor(
     }
 
     fun searchPokemonByName(name: String) {
-        _viewState.postValue(PokedexIndexViewState.Loading)
+        _viewState.value = PokedexIndexViewState.Loading
         jobSearch = viewModelScope.launch(Dispatchers.IO) {
-            val pokemons = searchPokemonUseCase.getAllByName(name)
-            withContext(Dispatchers.Main) {
-                _viewState.postValue(PokedexIndexViewState.Success(pokemons))
+            searchPokemonUseCase.getAllByName(name).collect { pokemons ->
+                _viewState.value = PokedexIndexViewState.Success(pokemons)
             }
         }
     }
 
     fun getPokemons() {
         if (savedStateHandle.contains(pokemonRecyclerStateKey)) {
-            _viewState.postValue(PokedexIndexViewState.Success(savedStateHandle[pokemonRecyclerStateKey]!!))
+            _viewState.value =
+                PokedexIndexViewState.Success(savedStateHandle[pokemonRecyclerStateKey]!!)
             return
         }
         getPokemonList()
@@ -70,57 +73,58 @@ class PokedexIndexViewModel @Inject constructor(
 
     private fun getPokemonList() {
         job = viewModelScope.launch(Dispatchers.IO) {
-            val response = getAllPokemonUseCase.getAllPokemon()
-            withContext(Dispatchers.Main) {
+            getAllPokemonUseCase.getAllPokemon().collect { response ->
                 if (response.isSuccessful) {
                     val pokemons = response.body()!!.results.map { p -> p.toDomainPokemonSummary() }
-                    _viewState.postValue(PokedexIndexViewState.Success(pokemons))
+                    _viewState.value = PokedexIndexViewState.Success(pokemons)
                     pokemons.map { p ->
 
-                        val pokemonResponse = getPokemonUseCase.getPokemonInfo(p.id)
-                        val pokemonEncounterResponse =
-                            getPokemonUseCase.getPokemonEncounterInfo(p.id)
-                        if (pokemonEncounterResponse.isSuccessful) {
-                            val apiResponse = pokemonEncounterResponse.body()!!
-                            savePokemonUseCase.savePokemonLocationsInfo(
-                                pokemonId = p.id,
-                                locations = apiResponse.map { e ->
-                                    PokemonLocation(
-                                        id = PokemonPropertiesExtractor().getIdFromUrl(
-                                            e.locationArea.url
-                                        ), name = e.locationArea.name
+                        getPokemonUseCase.getPokemonInfo(p.id).collect { pokemonResponse ->
+                            if (pokemonResponse.isSuccessful) {
+                                val apiResponse = pokemonResponse.body()!!
+                                savePokemonUseCase.savePokemonInfo(
+                                    PokemonInfo(
+                                        p.id,
+                                        p.name,
+                                        PokemonPropertiesExtractor().getImageUrlFromId(p.id),
+                                        types = apiResponse.types.map { pk ->
+                                            PokemonKind(
+                                                PokemonPropertiesExtractor().getIdFromUrl(pk.type.url),
+                                                pk.type.name
+                                            )
+                                        },
+                                        attacks = apiResponse.moves.map { m ->
+                                            PokemonAttack(
+                                                m.move.name,
+                                                PokemonPropertiesExtractor().getIdFromUrl(m.move.url)
+                                            )
+                                        },
+                                        skills = apiResponse.abilities.map { a ->
+                                            PokemonSkill(
+                                                a.ability.name,
+                                                id = PokemonPropertiesExtractor().getIdFromUrl(a.ability.url)
+                                            )
+                                        },
+                                        locations = listOf()
                                     )
-                                })
-                        }
-                        if (pokemonResponse.isSuccessful) {
-                            val apiResponse = pokemonResponse.body()!!
-                            savePokemonUseCase.savePokemonInfo(
-                                PokemonInfo(
-                                    p.id,
-                                    p.name,
-                                    PokemonPropertiesExtractor().getImageUrlFromId(p.id),
-                                    types = apiResponse.types.map { pk ->
-                                        PokemonKind(
-                                            PokemonPropertiesExtractor().getIdFromUrl(pk.type.url),
-                                            pk.type.name
-                                        )
-                                    },
-                                    attacks = apiResponse.moves.map { m ->
-                                        PokemonAttack(
-                                            m.move.name,
-                                            PokemonPropertiesExtractor().getIdFromUrl(m.move.url)
-                                        )
-                                    },
-                                    skills = apiResponse.abilities.map { a ->
-                                        PokemonSkill(
-                                            a.ability.name,
-                                            id = PokemonPropertiesExtractor().getIdFromUrl(a.ability.url)
-                                        )
-                                    },
-                                    locations = listOf()
                                 )
-                            )
+                            }
                         }
+                        getPokemonUseCase.getPokemonEncounterInfo(p.id)
+                            .collect { pokemonEncounterResponse ->
+                                if (pokemonEncounterResponse.isSuccessful) {
+                                    val apiResponse = pokemonEncounterResponse.body()!!
+                                    savePokemonUseCase.savePokemonLocationsInfo(
+                                        pokemonId = p.id,
+                                        locations = apiResponse.map { e ->
+                                            PokemonLocation(
+                                                id = PokemonPropertiesExtractor().getIdFromUrl(
+                                                    e.locationArea.url
+                                                ), name = e.locationArea.name
+                                            )
+                                        })
+                                }
+                            }
                     }
                 } else {
                     onError("Error : ${response.message()} ")
@@ -130,7 +134,7 @@ class PokedexIndexViewModel @Inject constructor(
     }
 
     private fun onError(message: String) {
-        _viewState.postValue(PokedexIndexViewState.Error(errorMessage = message))
+        _viewState.value = PokedexIndexViewState.Error(errorMessage = message)
     }
 
     override fun onCleared() {

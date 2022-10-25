@@ -8,11 +8,14 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import me.danielaguilar.pokedex.R
 import me.danielaguilar.pokedex.databinding.FragmentPokedexIndexBinding
 import me.danielaguilar.pokedex.domain.PokemonSummary
@@ -50,27 +53,35 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
         setAdapter(pokemonSummaryList)
         binding.pokemonsList.layoutManager =
             GridLayoutManager(context, resources.getInteger(R.integer.span_count))
-        viewModel.viewState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is PokedexIndexViewState.Loading ->
-                    showLoading()
-                is PokedexIndexViewState.Error -> {
-                    hideLoading()
-                    showError(state.errorMessage)
-                    showReloadButton()
-                }
-                is PokedexIndexViewState.Success -> {
-                    hideLoading()
-                    showPokemonList()
-                    this.pokemonSummaryList = state.data
-                    setAdapter(state.data)
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.viewState.collect { state ->
+                    when (state) {
+                        is PokedexIndexViewState.Loading ->
+                            showLoading()
+                        is PokedexIndexViewState.Error -> {
+                            hideLoading()
+                            showError(state.errorMessage)
+                            showReloadButton()
+                        }
+                        is PokedexIndexViewState.Success -> {
+                            hideLoading()
+                            showPokemonList()
+                            setPokemonSummaryList(state.data)
+                            setAdapter(state.data)
+                        }
+                    }
+
                 }
 
-                else -> {}
             }
-
         }
+
         viewModel.getPokemons()
+    }
+
+    private fun setPokemonSummaryList(data: List<PokemonSummary>) {
+        this.pokemonSummaryList = data
     }
 
     override fun onDestroyView() {
@@ -78,6 +89,12 @@ class PokedexIndexFragment : Fragment(), OnClickListener {
         viewModel.setRecyclerState(binding.pokemonsList.layoutManager?.onSaveInstanceState()!!)
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onPause() {
+        viewModel.setData(pokemonSummaryList)
+        viewModel.setRecyclerState(binding.pokemonsList.layoutManager?.onSaveInstanceState()!!)
+        super.onPause()
     }
 
     private fun setAdapter(pokemonSummaries: List<PokemonSummary>) {
